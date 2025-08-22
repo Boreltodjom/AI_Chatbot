@@ -19,7 +19,7 @@ logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 
 # Flask app setup
 app = Flask(__name__)
-app.secret_key = 'your-secret-key-change-this'  # Required for sessions
+app.secret_key = os.getenv("SECRET_KEY")
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
@@ -306,8 +306,9 @@ def health():
     })
 
 if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
     print(f"API Key loaded: {bool(OPENROUTER_API_KEY)}")
     print(f"Current date: {datetime.now().strftime('%Y-%m-%d')}")
     print("Starting advanced chatbot with memory and improved image processing...")
-    print("Visit http://localhost:5000")
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    print(f"Server will run on port: {port}")
+    app.run(debug=False, host="0.0.0.0", port=port)
