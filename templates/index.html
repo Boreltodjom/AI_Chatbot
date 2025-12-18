@@ -4,7 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AI Chatbot</title>
-  <style>
+  <meta name="csrf-token" content="{{ csrf_token }}">
+  <style nonce="{{ csp_nonce }}">
     :root {
       --bg: #f0f2f5;
       --chat-bg: #ffffff;
@@ -122,52 +123,39 @@
       background: var(--chat-bg);
       color: var(--text);
     }
-    .send-btn, .mic-btn, .file-label {
-      background: #667eea;
-      color: white;
-      border: none;
-      border-radius: 50%;
-      width: 42px;
-      height: 42px;
-      cursor: pointer;
-      font-size: 18px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .send-btn:hover, .mic-btn:hover, .file-label:hover { background: #5a6fd8; }
-    .file-input { display: none; }
-    .image-preview { text-align: center; margin-top: 8px; }
+    .send-btn, .mic-btn { background: #667eea; color: white; border: none; border-radius: 50%; width: 42px; height: 42px; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; }
+    .send-btn:hover, .mic-btn:hover { background: #5a6fd8; }
+    .image-preview { text-align: center; margin-top: 8px; display: none; }
+    .image-preview.visible { display: block; }
     .image-preview img { max-width: 100px; border-radius: 8px; border: 1px solid #ccc; }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.7/dist/purify.min.js"></script>
 </head>
 <body>
   <div class="chat-container">
     <div class="chat-header">
       🤖 AI Chatbot
-      <button class="toggle-btn" onclick="toggleTheme()">🌙</button>
+      <button id="toggleBtn" class="toggle-btn">🌙</button>
     </div>
     <div id="chatMessages" class="chat-messages"></div>
     <div class="input-container">
-      <label for="imageInput" class="file-label">📎</label>
-      <input type="file" id="imageInput" name="image" class="file-input" accept="image/*">
       <textarea id="messageInput" class="text-input" placeholder="Type a message..."></textarea>
-      <button onclick="sendMessage()" class="send-btn">➤</button>
-      <button onclick="startListening()" class="mic-btn">🎙️</button>
-    </div>
-    <div class="image-preview" id="imagePreview" style="display:none;">
+      <button id="sendBtn" class="send-btn">➤</button>
+      <button id="micBtn" class="mic-btn">🎙️</button>
+    <div class="image-preview" id="imagePreview">
       <img id="previewImg" src="" alt="Preview">
-      <button onclick="removeImage()">❌ Remove</button>
+      <button id="removeImageBtn">❌ Remove</button>
     </div>
   </div>
 
-  <script>
+  <script nonce="{{ csp_nonce }}">
     const chatMessages = document.getElementById("chatMessages");
     const messageInput = document.getElementById("messageInput");
     const imageInput = document.getElementById("imageInput");
     const previewImg = document.getElementById("previewImg");
     const imagePreview = document.getElementById("imagePreview");
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute("content");
 
     let introShown = false;
     let recognition;
@@ -188,7 +176,7 @@
         const reader = new FileReader();
         reader.onload = e => {
           previewImg.src = e.target.result;
-          imagePreview.style.display = "block";
+          imagePreview.classList.add("visible");
         };
         reader.readAsDataURL(file);
       }
@@ -197,7 +185,7 @@
     function removeImage() {
       imageInput.value = "";
       previewImg.src = "";
-      imagePreview.style.display = "none";
+      imagePreview.classList.remove("visible");
     }
 
     function addMessage(content, isUser = false) {
@@ -208,7 +196,14 @@
       avatar.textContent = isUser ? "👤" : "🤖";
       const bubble = document.createElement("div");
       bubble.className = "message-content";
-      bubble.innerHTML = isUser ? content : marked.parse(content);
+      if (isUser) {
+        bubble.textContent = content;
+      } else {
+        // Prevent XSS: markdown -> HTML -> sanitize before injecting.
+        marked.setOptions({ mangle: false, headerIds: false });
+        const html = marked.parse(content || "");
+        bubble.innerHTML = DOMPurify.sanitize(html, { USE_PROFILES: { html: true } });
+      }
       msg.appendChild(avatar);
       msg.appendChild(bubble);
       chatMessages.appendChild(msg);
@@ -247,12 +242,24 @@
       removeImage();
 
       try {
-        const res = await fetch("/chat", { method: "POST", body: formData });
-        const data = await res.json();
-        addMessage(data.response, false);
+        const res = await fetch("/chat", {
+          method: "POST",
+          headers: { "X-CSRF-Token": csrfToken },
+          body: formData
+        });
+        if (!res.ok) {
+          // try to get more info from the body
+          let bodyText = '';
+          try { bodyText = await res.text(); } catch (e) { bodyText = '<no body>'; }
+          console.error('Server returned non-OK status', res.status, res.statusText, bodyText);
+          addMessage(`❌ Server error ${res.status} ${res.statusText}: ${bodyText}`, false);
+        } else {
+          const data = await res.json();
+          addMessage(data.response, false);
+        }
       } catch (err) {
         console.error("Fetch error:", err); // Log the actual error for debugging
-        addMessage("❌ Error connecting to server.", false);
+        addMessage(`❌ Error connecting to server: ${err.message}`, false);
       }
     }
 
@@ -387,6 +394,16 @@
       }
       addMessage(intro, false);
       introShown = true;
+    }
+
+    // Attach event listeners (avoid inline handlers so CSP nonces permit execution)
+    try {
+      document.getElementById('toggleBtn').addEventListener('click', toggleTheme);
+      document.getElementById('sendBtn').addEventListener('click', sendMessage);
+      document.getElementById('micBtn').addEventListener('click', startListening);
+      document.getElementById('removeImageBtn').addEventListener('click', removeImage);
+    } catch (e) {
+      console.warn('Event listener attach error:', e);
     }
   </script>
 </body>
