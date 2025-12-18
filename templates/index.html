@@ -152,9 +152,6 @@
   <script nonce="{{ csp_nonce }}">
     const chatMessages = document.getElementById("chatMessages");
     const messageInput = document.getElementById("messageInput");
-    const imageInput = document.getElementById("imageInput");
-    const previewImg = document.getElementById("previewImg");
-    const imagePreview = document.getElementById("imagePreview");
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute("content");
 
     let introShown = false;
@@ -167,25 +164,6 @@
       document.body.classList.toggle("dark");
       const btn = document.querySelector(".toggle-btn");
       btn.textContent = document.body.classList.contains("dark") ? "🌞" : "🌙";
-    }
-
-    // Preview selected image
-    imageInput.addEventListener("change", e => {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = e => {
-          previewImg.src = e.target.result;
-          imagePreview.classList.add("visible");
-        };
-        reader.readAsDataURL(file);
-      }
-    });
-
-    function removeImage() {
-      imageInput.value = "";
-      previewImg.src = "";
-      imagePreview.classList.remove("visible");
     }
 
     function addMessage(content, isUser = false) {
@@ -213,22 +191,13 @@
     async function sendMessage() {
       const message = messageInput.value; // Get original message (including potential leading/trailing spaces)
       const strippedMessage = message.trim(); // For logic checks
-      const hasImage = imageInput.files.length > 0;
+      const hasImage = false; // Image uploads removed
 
-      if (!strippedMessage && !hasImage) return; // Prevent sending completely empty content
+      if (!strippedMessage) return; // Prevent sending completely empty content
 
       // Add user message bubble only if there's text to show
       if (strippedMessage) {
         addMessage(message, true); // Show original message including spaces if user typed them
-      }
-
-      // Indicate image upload visually if an image is present
-      if (hasImage) {
-        // If no text message was shown, still indicate the image action
-        if (!strippedMessage) {
-             addMessage("📷 Image uploaded", true);
-        }
-        // If there was text, the text bubble already indicates the action
       }
 
       const formData = new FormData();
@@ -236,10 +205,8 @@
       if (message !== undefined && message !== null) {
           formData.append("message", message);
       }
-      if (hasImage) formData.append("image", imageInput.files[0]);
 
       messageInput.value = "";
-      removeImage();
 
       try {
         const res = await fetch("/chat", {
