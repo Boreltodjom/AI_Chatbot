@@ -13,7 +13,88 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 LLM_PROVIDER = os.getenv("LLM_PROVIDER", "groq").lower().strip()  # groq | openrouter | demo
 ALLOW_DEMO_FALLBACK = os.getenv("ALLOW_DEMO_FALLBACK", "true").lower() in ("1", "true", "yes", "on")
 OPENROUTER_HTTP_REFERER = os.getenv("OPENROUTER_HTTP_REFERER")  # optional but recommended by OpenRouter
+OPENROUTER_HTTP_REFERER = os.getenv("OPENROUTER_HTTP_REFERER")  # optional but recommended by OpenRouter
 OPENROUTER_X_TITLE = os.getenv("OPENROUTER_X_TITLE")  # optional but recommended by OpenRouter
+
+DOVV_SYSTEM_PROMPT = """
+You are "DOVV Assistant", the dedicated virtual employee for **DOVV Distribution Sarl**, Cameroon's premier supermarket chain.
+
+**Your Mission:**
+To provide a "perfect" customer experience by being extremely knowledgeable, polite, and helpful (in both French and English).
+You must help convert inquiries into sales ("seal the deal") by conducting yourself as a proud DOVV representative.
+
+**Core Knowledge Base:**
+
+1.  **Identity & History:**
+    *   **Founded:** August 21, 2003, by Mr. Philippe Tagne Noubissi.
+    *   **First Store:** Mokolo, Yaoundé.
+    *   **Headquarters:** Bastos, Yaoundé.
+    *   **Motto/Values:** "La référence" (The Reference). We fight against the high cost of living ("Vie chère"), prioritize Hygiene, Quality, and Proximity.
+
+2.  **Locations (Yaoundé):**
+    *   **Bastos (HQ):** Upscale, wide variety, easy parking.
+    *   **Mokolo:** The historic first store, bustling market area.
+    *   **Marché Central:** Heart of the city.
+    *   **Essos:** Serving the Essos/Benoue neighborhood.
+    *   **Tongolo:** Northern exit route.
+    *   **Elig Essono:** Near the Total station.
+    *   **Mimboman:** East side of town.
+    *   **Mendong:** Student and residential area.
+    *   **Simbock:** Featuring "Cash & Carry" for wholesale/bulk buying.
+    *   *(Note: If asked about Douala or other cities, say we are expanding soon but currently focused on Yaoundé).*
+
+3.  **Services & Departments:**
+    *   **Supermarket:** Groceries, fresh produce, frozen foods.
+    *   **Bakery & Pastry (Boulangerie/Pâtisserie):** Fresh bread daily, croissants, birthday cakes, wedding cakes. *Highlight this!*
+    *   **Butchery & Fish (Boucherie/Poissonnerie):** Fresh meat (beef, pork, chicken) and wide fish selection.
+    *   **Cosmetics & Perfumery:** Beauty products, lotions, perfumes.
+    *   **Liquor Store (Cave à Vins):** Extensive collection of wines, champagnes, and spirits.
+    *   **Local Products:** Proudly selling "Made in Cameroon" (Ndolé, dried fish, spices, tapioca, etc.).
+
+4.  **Recruitment (Job Application Process):**
+    *   **To Apply:** Deposit a physical folder (Dossier Physique) at the General Directorate (Bastos) or any DOVV Agency against a receipt.
+    *   **Required Documents (Standard Dossier):**
+        1.  Handwritten Request (Demande manuscrite non timbrée) addressed to the General Manager.
+        2.  CV (Curriculum Vitae).
+        3.  Photocopy of CNI (Valid ID card).
+        4.  Photocopy of Highest Diploma/Certificates.
+        5.  Criminal Record (Extrait de Casier Judiciaire n°3) < 3 months.
+        6.  Medical Certificate (Certificat Médical) < 3 months.
+        7.  Photos: 1 Half-photo (4x4) and 1 Full photo (Carte entière).
+        8.  Location Plan (Plan de localisation).
+
+5.  **Product & Price Examples (Indicative Market Prices - Always warn to check store):**
+    *   *Wines:* Vin Blanc CUVEE du ROI (1L ~1200 FCFA), Vin Rouge CAPO MERLOT (~1500 FCFA), B&G St. Emilion (~15000 FCFA), Vins de table generally start ~1200-1500 FCFA.
+    *   *Rice (Riz):* 
+        - 1kg varies (~500-800 FCFA depending on brand/quality).
+        - 25kg bags (Perfumed) ~17,500 - 18,500 FCFA.
+        - 25kg bags (Standard) ~13,000 FCFA.
+        - *Brands:* Riz Mémé Cassé, Riz Parfumé (check daily stock).
+    *   *Oil (Huile Végétale):*
+        - Mayor/Diamaor 1L bottle ~1,500 - 1,600 FCFA.
+        - 5L Bidon ~7,500+ FCFA.
+    *   *Bakery:* Baguette (Regulated price ~150 FCFA), Croissants (~200-300 FCFA).
+    *   *Water:* Tangui/Superment (starts ~300-400 FCFA).
+
+6.  **Key Policies:**
+    *   **Delivery:** "We do not currently have a central online delivery app. However, for large orders, please visit your nearest branch manager to discuss arrangements. Third-party delivery apps like Sasayez may list us, but buying in-store ensures the best prices and freshness."
+    *   **Payment:** Cash, Orange Money, MTN Mobile Money, Visa/Mastercard (in major branches like Bastos).
+    *   **Returns:** "Please check your receipt and product condition immediately at the counter. Perishable goods generally cannot be returned for hygiene reasons."
+
+**Operational Guidelines:**
+*   **Language:** STRICTLY BILINGUAL.
+    *   If user speaks English -> Reply in English.
+    *   If user speaks French -> Reply in French.
+    *   If user speaks Camfranglais -> Reply in a friendly, understandable French/English mix but keep it professional.
+*   **Tone:** Warm, commercial, inviting. Use phrases like:
+    *   (FR) "Passer au magasin, c'est encore mieux !" / "Nous serions ravis de vous accueillir à Bastos."
+    *   (EN) "Visiting the store is even better!" / "We'd love to welcome you at our Mokolo branch."
+*   **Handling "Unknowns":** NEVER invent a price or policy. If unsure, say:
+    *   "That's a great question! Prices change to give you the best deal. Please check our Facebook page or visit the store directly to confirm."
+
+**Closing:**
+Always end with an invitation to visit DOVV. "See you soon at DOVV!" or "À très bientôt chez DOVV !"
+"""
 
 # Flask app setup
 app = Flask(__name__)
@@ -130,64 +211,76 @@ def ask_demo(prompt: str, has_image: bool = False) -> str:
         "- **If you want**: Paste more context and I’ll format it cleanly."
     )
 
-# --- Send to Groq WITH CONTEXT ---
-def ask_groq_with_context(session_id, prompt, image_path=None):
-    if not GROQ_API_KEY:
+# --- Send to LLM (Groq or OpenRouter) WITH CONTEXT ---
+def ask_llm_with_context(session_id, prompt, image_path=None):
+    provider = LLM_PROVIDER
+    api_key = OPENROUTER_API_KEY if provider == "openrouter" else GROQ_API_KEY
+    
+    if not api_key:
         if ALLOW_DEMO_FALLBACK:
             return ask_demo(prompt, has_image=bool(image_path))
-        return "⚠️ API key not configured."
+        return f"⚠️ {provider.upper()}_API_KEY not configured."
 
-    headers = {"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"}
-    
+    # Determine URL and headers
+    if provider == "openrouter":
+        url = "https://openrouter.ai/api/v1/chat/completions"
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+            "HTTP-Referer": OPENROUTER_HTTP_REFERER or "http://localhost:5000",
+            "X-Title": OPENROUTER_X_TITLE or "DOVV Assistant",
+        }
+        # OpenRouter often uses "openai/gpt-3.5-turbo" or others. Default to a good cheap one or let user set env.
+        model = os.getenv("OPENROUTER_MODEL", "meta-llama/llama-3-8b-instruct:free") # Example default
+    else:
+        # Default to Groq
+        url = "https://api.groq.com/openai/v1/chat/completions"
+        headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+        model = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+
     try:
         # Get conversation history for this session
         history = get_conversation_history(session_id)
         
+        # OpenRouter specific: check if model supports vision if image provided (omit for now, assume text)
         if image_path:
-            logging.warning("Image analysis requested but current Groq model doesn't support vision. Showing message to user.")
-            return "📷 **Image upload noted**, but the current AI model (llama-3.3-70b-versatile) doesn't support image analysis yet.\n\nYou can still:\n- Describe the image in text and I'll help analyze it\n- Ask questions about it and I'll guide you through analysis\n\nWhat would you like to know?"
-        
-        # Text model request with context
-        messages = []
-        # Add previous conversation history to the prompt
+             # Basic handling: just warn if not supported or implemented
+             pass 
+
+        messages = [{"role": "system", "content": DOVV_SYSTEM_PROMPT}]
         for turn in history:
-            # Only add if both user and assistant parts exist
             if turn.get('user') and turn.get('assistant'):
                 messages.append({"role": "user", "content": turn['user']})
                 messages.append({"role": "assistant", "content": turn['assistant']})
         
-        # Add the current user prompt
         messages.append({"role": "user", "content": prompt})
+
+        data = {
+            "model": model,
+            "messages": messages,
+            "temperature": 0.7,
+            "max_tokens": 800
+        }
         
-        # Groq's recommended model (llama-3.3-70b-versatile)
-        model = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+        logging.info(f"Sending request to {provider} with {len(messages)} messages")
 
-        data = {"model": model, "messages": messages, "temperature": 0.7, "max_tokens": 800}
-        logging.info(f"Sending request to Groq with {len(messages)} messages")
-
-        response = requests.post("https://api.groq.com/openai/v1/chat/completions",
-                                 headers=headers, json=data, timeout=45)
-        logging.info(f"Received response status: {response.status_code}")
+        response = requests.post(url, headers=headers, json=data, timeout=45)
+        
         if response.status_code == 200:
             result = response.json()
             answer = result['choices'][0]['message']['content'].strip()
             return format_ai_response(answer)
         else:
-            # Don't expose full error details to user for security
             error_code = response.status_code
-            logging.error(f"Groq API error ({error_code})")
-            # Common failure modes: 401 (bad key), 429 (rate limit), 500+ (server issues)
+            logging.error(f"{provider} API error ({error_code}): {response.text}")
             if ALLOW_DEMO_FALLBACK and error_code in (401, 429, 500, 502, 503):
-                demo = ask_demo(prompt, has_image=False)
-                return (
-                    f"Provider temporarily unavailable. Falling back to demo mode.\n\n"
-                    f"{demo}"
-                )
-            return f"❌ Error communicating with AI provider. Please try again later."
+                return ask_demo(prompt, has_image=False)
+            return f"❌ Error communicating with {provider}."
+            
     except Exception as e:
         logging.error(f"Request exception: {e}", exc_info=True)
         if ALLOW_DEMO_FALLBACK:
-            return f"Provider exception. Falling back to demo mode.\n\n{ask_demo(prompt, has_image=False)}"
+             return ask_demo(prompt, has_image=False)
         return f"❌ Error: Please try again later."
 
 @app.before_request
@@ -292,7 +385,7 @@ def chat():
         filepath = os.path.join(tmp_dir, tmp_name)
         file.save(filepath)
         try:
-            ai_response = ask_groq_with_context(session_id, message, filepath)
+            ai_response = ask_llm_with_context(session_id, message, filepath)
             add_to_conversation(session_id, f"[Image] {message}".strip(), ai_response)
             return jsonify({"response": ai_response})
         finally:
@@ -302,7 +395,7 @@ def chat():
                 pass
 
     if message:
-        ai_response = ask_groq_with_context(session_id, message)
+        ai_response = ask_llm_with_context(session_id, message)
         add_to_conversation(session_id, message, ai_response)
         return jsonify({"response": ai_response})
 
