@@ -16,84 +16,47 @@ OPENROUTER_HTTP_REFERER = os.getenv("OPENROUTER_HTTP_REFERER")  # optional but r
 OPENROUTER_HTTP_REFERER = os.getenv("OPENROUTER_HTTP_REFERER")  # optional but recommended by OpenRouter
 OPENROUTER_X_TITLE = os.getenv("OPENROUTER_X_TITLE")  # optional but recommended by OpenRouter
 
-DOVV_SYSTEM_PROMPT = """
-You are "DOVV Assistant", the dedicated virtual employee for **DOVV Distribution Sarl**, Cameroon's premier supermarket chain.
+KEENAN_SYSTEM_PROMPT = """
+You are "Keenan Assistant", the dedicated virtual concierge for **Keenan Salon**, an inclusive hair salon in Atlanta, GA.
 
 **Your Mission:**
-To provide a "perfect" customer experience by being extremely knowledgeable, polite, and helpful (in both French and English).
-You must help convert inquiries into sales ("seal the deal") by conducting yourself as a proud DOVV representative.
+To provide a welcoming, affirming, and seamless customer experience. You must help clients understand our services, our unique gratuity-free pricing, and guide them to book an appointment.
 
 **Core Knowledge Base:**
 
-1.  **Identity & History:**
-    *   **Founded:** August 21, 2003, by Mr. Philippe Tagne Noubissi.
-    *   **First Store:** Mokolo, Yaoundé.
-    *   **Headquarters:** Bastos, Yaoundé.
-    *   **Motto/Values:** "La référence" (The Reference). We fight against the high cost of living ("Vie chère"), prioritize Hygiene, Quality, and Proximity.
+1.  **Identity & Vibe:**
+    *   **Established:** 2005.
+    *   **Location:** 2100 Cheshire Bridge Road, Atlanta, Georgia 30324 UNIT E (Morningside).
+    *   **Values:** Woman-owned, Queer-owned, LGBTQ+ friendly, Safe & Sustainable.
+    *   **Vibe:** Affirming, welcoming, and real. Every identity and story is celebrated.
 
-2.  **Locations (Yaoundé):**
-    *   **Bastos (HQ):** Upscale, wide variety, easy parking.
-    *   **Mokolo:** The historic first store, bustling market area.
-    *   **Marché Central:** Heart of the city.
-    *   **Essos:** Serving the Essos/Benoue neighborhood.
-    *   **Tongolo:** Northern exit route.
-    *   **Elig Essono:** Near the Total station.
-    *   **Mimboman:** East side of town.
-    *   **Mendong:** Student and residential area.
-    *   **Simbock:** Featuring "Cash & Carry" for wholesale/bulk buying.
-    *   *(Note: If asked about Douala or other cities, say we are expanding soon but currently focused on Yaoundé).*
+2.  **Services:**
+    *   Cuts, Custom Color, Blonding, Vivid Transformations.
+    *   Extensions & Keratin Treatments.
+    *   Curl Care (Curls & Coils, Curl Cult®).
+    *   Weddings & Events (Bloom Team).
 
-3.  **Services & Departments:**
-    *   **Supermarket:** Groceries, fresh produce, frozen foods.
-    *   **Bakery & Pastry (Boulangerie/Pâtisserie):** Fresh bread daily, croissants, birthday cakes, wedding cakes. *Highlight this!*
-    *   **Butchery & Fish (Boucherie/Poissonnerie):** Fresh meat (beef, pork, chicken) and wide fish selection.
-    *   **Cosmetics & Perfumery:** Beauty products, lotions, perfumes.
-    *   **Liquor Store (Cave à Vins):** Extensive collection of wines, champagnes, and spirits.
-    *   **Local Products:** Proudly selling "Made in Cameroon" (Ndolé, dried fish, spices, tapioca, etc.).
+3.  **Pricing Model (Crucial!):**
+    *   **Gratuity-Free Hourly Pricing:** We use an hourly pricing model. There is NO tipping and NO hidden fees. It is honest and stress-free service. Everything is personalized.
 
-4.  **Recruitment (Job Application Process):**
-    *   **To Apply:** Deposit a physical folder (Dossier Physique) at the General Directorate (Bastos) or any DOVV Agency against a receipt.
-    *   **Required Documents (Standard Dossier):**
-        1.  Handwritten Request (Demande manuscrite non timbrée) addressed to the General Manager.
-        2.  CV (Curriculum Vitae).
-        3.  Photocopy of CNI (Valid ID card).
-        4.  Photocopy of Highest Diploma/Certificates.
-        5.  Criminal Record (Extrait de Casier Judiciaire n°3) < 3 months.
-        6.  Medical Certificate (Certificat Médical) < 3 months.
-        7.  Photos: 1 Half-photo (4x4) and 1 Full photo (Carte entière).
-        8.  Location Plan (Plan de localisation).
+4.  **Operational Guidelines:**
+    *   **Appointments:** APPOINTMENT ONLY.
+    *   **Booking Link:** Always provide this link when they want to book: http://Keenansalon.GlossGenius.com
+    *   **Stylist Quiz:** If they aren't sure who to book with, offer the Stylist Pairing Quiz: https://keenansalon.com/haircut-quiz/
+    *   **Hours of Operation:**
+        *   SUN: 10am – 3pm
+        *   MON: Bloom Team (Weddings/Events)
+        *   TUES - THU: 10am – 8pm
+        *   FRI: 10am – 7pm
+        *   SAT: 9am – 6pm
 
-5.  **Product & Price Examples (Indicative Market Prices - Always warn to check store):**
-    *   *Wines:* Vin Blanc CUVEE du ROI (1L ~1200 FCFA), Vin Rouge CAPO MERLOT (~1500 FCFA), B&G St. Emilion (~15000 FCFA), Vins de table generally start ~1200-1500 FCFA.
-    *   *Rice (Riz):* 
-        - 1kg varies (~500-800 FCFA depending on brand/quality).
-        - 25kg bags (Perfumed) ~17,500 - 18,500 FCFA.
-        - 25kg bags (Standard) ~13,000 FCFA.
-        - *Brands:* Riz Mémé Cassé, Riz Parfumé (check daily stock).
-    *   *Oil (Huile Végétale):*
-        - Mayor/Diamaor 1L bottle ~1,500 - 1,600 FCFA.
-        - 5L Bidon ~7,500+ FCFA.
-    *   *Bakery:* Baguette (Regulated price ~150 FCFA), Croissants (~200-300 FCFA).
-    *   *Water:* Tangui/Superment (starts ~300-400 FCFA).
-
-6.  **Key Policies:**
-    *   **Delivery:** "We do not currently have a central online delivery app. However, for large orders, please visit your nearest branch manager to discuss arrangements. Third-party delivery apps like Sasayez may list us, but buying in-store ensures the best prices and freshness."
-    *   **Payment:** Cash, Orange Money, MTN Mobile Money, Visa/Mastercard (in major branches like Bastos).
-    *   **Returns:** "Please check your receipt and product condition immediately at the counter. Perishable goods generally cannot be returned for hygiene reasons."
-
-**Operational Guidelines:**
-*   **Language:** STRICTLY BILINGUAL.
-    *   If user speaks English -> Reply in English.
-    *   If user speaks French -> Reply in French.
-    *   If user speaks Camfranglais -> Reply in a friendly, understandable French/English mix but keep it professional.
-*   **Tone:** Warm, commercial, inviting. Use phrases like:
-    *   (FR) "Passer au magasin, c'est encore mieux !" / "Nous serions ravis de vous accueillir à Bastos."
-    *   (EN) "Visiting the store is even better!" / "We'd love to welcome you at our Mokolo branch."
-*   **Handling "Unknowns":** NEVER invent a price or policy. If unsure, say:
-    *   "That's a great question! Prices change to give you the best deal. Please check our Facebook page or visit the store directly to confirm."
+**Communication Style:**
+*   **Language:** ENGLISH ONLY.
+*   **Tone:** Warm, professional, LGBTQ+ affirming, and laid-back but highly competent. Use inclusive language.
+*   **Handling "Unknowns":** Do not guess prices. Say: "Since our pricing is hourly and gratuity-free, the total depends on the time needed for your specific hair goals. Feel free to book a consultation or check out our stylists to see their specific hourly rates!"
 
 **Closing:**
-Always end with an invitation to visit DOVV. "See you soon at DOVV!" or "À très bientôt chez DOVV !"
+Always invite them to book or take our stylist quiz to find their perfect match.
 """
 
 # Flask app setup
@@ -108,7 +71,7 @@ os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 
 # --- Conversation memory ---
-conversations = {}
+# Removed: Vercel serverless functions are stateless. UI will handle history.
 
 # --- Simple in-memory rate limiting (good enough for a demo; use Redis in prod) ---
 _RATE = {
@@ -155,22 +118,7 @@ def _check_csrf():
     sent = request.headers.get("X-CSRF-Token") or request.form.get("csrf_token")
     return bool(sent) and secrets.compare_digest(sent, session.get("csrf_token", ""))
 
-def get_conversation_history(session_id):
-    if session_id not in conversations:
-        conversations[session_id] = []
-    return conversations[session_id]
-
-def add_to_conversation(session_id, user_message, ai_response):
-    if session_id not in conversations:
-        conversations[session_id] = []
-    conversations[session_id].append({
-        'user': user_message,
-        'assistant': ai_response,
-        'timestamp': datetime.now().isoformat()
-    })
-    # keep last 8 exchanges
-    if len(conversations[session_id]) > 8:
-        conversations[session_id] = conversations[session_id][-8:]
+# State management completely moved to frontend
 
 # --- Format AI response (make more human-like) ---
 def format_ai_response(text):
@@ -212,13 +160,13 @@ def ask_demo(prompt: str, has_image: bool = False) -> str:
     )
 
 # --- Send to LLM (Groq or OpenRouter) WITH CONTEXT ---
-def ask_llm_with_context(session_id, prompt, image_path=None):
+def ask_llm_with_context(history, prompt):
     provider = LLM_PROVIDER
     api_key = OPENROUTER_API_KEY if provider == "openrouter" else GROQ_API_KEY
     
     if not api_key:
         if ALLOW_DEMO_FALLBACK:
-            return ask_demo(prompt, has_image=bool(image_path))
+            return ask_demo(prompt, has_image=False)
         return f"⚠️ {provider.upper()}_API_KEY not configured."
 
     # Determine URL and headers
@@ -228,30 +176,21 @@ def ask_llm_with_context(session_id, prompt, image_path=None):
             "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json",
             "HTTP-Referer": OPENROUTER_HTTP_REFERER or "http://localhost:5000",
-            "X-Title": OPENROUTER_X_TITLE or "DOVV Assistant",
+            "X-Title": OPENROUTER_X_TITLE or "Keenan Assistant",
         }
-        # OpenRouter often uses "openai/gpt-3.5-turbo" or others. Default to a good cheap one or let user set env.
-        model = os.getenv("OPENROUTER_MODEL", "meta-llama/llama-3-8b-instruct:free") # Example default
+        model = os.getenv("OPENROUTER_MODEL", "meta-llama/llama-3-8b-instruct:free")
     else:
-        # Default to Groq
         url = "https://api.groq.com/openai/v1/chat/completions"
         headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
         model = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
 
     try:
-        # Get conversation history for this session
-        history = get_conversation_history(session_id)
+        messages = [{"role": "system", "content": KEENAN_SYSTEM_PROMPT}]
         
-        # OpenRouter specific: check if model supports vision if image provided (omit for now, assume text)
-        if image_path:
-             # Basic handling: just warn if not supported or implemented
-             pass 
-
-        messages = [{"role": "system", "content": DOVV_SYSTEM_PROMPT}]
+        # Add history passed from the frontend (stateless)
         for turn in history:
-            if turn.get('user') and turn.get('assistant'):
-                messages.append({"role": "user", "content": turn['user']})
-                messages.append({"role": "assistant", "content": turn['assistant']})
+            if isinstance(turn, dict) and 'role' in turn and 'content' in turn:
+                messages.append({"role": turn['role'], "content": turn['content']})
         
         messages.append({"role": "user", "content": prompt})
 
@@ -341,71 +280,34 @@ def _security_headers(resp):
 def home():
     if 'session_id' not in session:
         session['session_id'] = str(uuid.uuid4())
-        # Do NOT send intro yet - wait for language selection in frontend
-        # Or, if you prefer the old behavior, uncomment the lines below and comment out the new ones
-        # intro = (
-        #     "👋 Hello! I’m your AI Assistant.\n\n"
-        #     "Here’s what I can do:\n"
-        #     "1. 💬 Chat with you naturally\n"
-        #     "2. 📷 Analyze uploaded images and answer questions\n"
-        #     "3. 🎙️ Accept voice input (on supported browsers)\n\n"
-        #     "Ask me anything to get started!"
-        # )
-        # conversations[session['session_id']] = [{
-        #     'user': None,
-        #     'assistant': intro,
-        #     'timestamp': datetime.now().isoformat()
-        # }]
-        conversations[session['session_id']] = [] # Start with empty history for language selection
     csrf = _ensure_csrf_token()
     g.csp_nonce = secrets.token_urlsafe(16)
     return render_template("index.html", csrf_token=csrf, csp_nonce=g.csp_nonce)
 
 @app.route("/chat", methods=["POST"])
 def chat():
-    session_id = session.get('session_id', str(uuid.uuid4()))
-    session['session_id'] = session_id
-    message = request.form.get("message", "").strip()
-    has_image = 'image' in request.files and request.files['image'].filename
+    # Consume JSON for stateless Vercel deployment
+    data = request.get_json(silent=True) or {}
+    message = data.get("message", request.form.get("message", "")).strip()
+    history = data.get("history", [])
 
-    if not message and not has_image:
-        return jsonify({"response": "⚠️ Please enter a message or upload an image."})
+    if not message:
+        return jsonify({"response": "⚠️ Please enter a message."})
 
-    if has_image:
-        file = request.files['image']
-        if not file.mimetype.startswith('image/'):
-            return jsonify({"response": "⚠️ Please upload a valid image."})
-        orig_name = secure_filename(file.filename or "")
-        _, ext = os.path.splitext(orig_name.lower())
-        if ext and ext not in ALLOWED_IMAGE_EXTS:
-            return jsonify({"response": "⚠️ Unsupported image type. Please upload JPG/PNG/WEBP/GIF."})
-        # Write to a temp file with a random name (prevents collisions & path tricks).
-        tmp_dir = app.config["UPLOAD_FOLDER"]
-        tmp_name = f"{uuid.uuid4().hex}{ext or '.jpg'}"
-        filepath = os.path.join(tmp_dir, tmp_name)
-        file.save(filepath)
-        try:
-            ai_response = ask_llm_with_context(session_id, message, filepath)
-            add_to_conversation(session_id, f"[Image] {message}".strip(), ai_response)
-            return jsonify({"response": ai_response})
-        finally:
-            try:
-                os.remove(filepath)
-            except Exception:
-                pass
-
-    if message:
-        ai_response = ask_llm_with_context(session_id, message)
-        add_to_conversation(session_id, message, ai_response)
+    try:
+        # Prevent massive payloads
+        if len(history) > 20: 
+            history = history[-20:]
+            
+        ai_response = ask_llm_with_context(history, message)
         return jsonify({"response": ai_response})
-
-    return jsonify({"response": "⚠️ Unexpected error."})
+    except Exception as e:
+        logging.error(f"Chat error: {e}", exc_info=True)
+        return jsonify({"response": "⚠️ Unexpected error."})
 
 @app.route("/clear", methods=["POST"])
 def clear_conversation():
-    session_id = session.get('session_id')
-    if session_id and session_id in conversations:
-        del conversations[session_id]
+    # Frontend handles memory now, backend just acknowledges
     return jsonify({"status": "cleared"})
 
 @app.route("/health")

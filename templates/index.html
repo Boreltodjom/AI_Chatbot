@@ -4,26 +4,25 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DOVV Assistant</title>
+  <title>Keenan Salon Assistant</title>
   <meta name="csrf-token" content="{{ csrf_token }}">
   <style nonce="{{ csp_nonce }}">
     :root {
-      --bg: #f0f2f5;
+      --bg: #f9f9f7;
       --chat-bg: #ffffff;
-      --text: #222;
-      --user-msg: #667eea;
-      --bot-msg: #e9ecef;
-      --header-bg: linear-gradient(135deg, #FF6600 0%, #CC0000 100%);
-      /* Adjusted to DOVV-like colors (Orange/Red) if possible, or keep neat */
+      --text: #333;
+      --user-msg: #8C8279;
+      --bot-msg: #EBEAE6;
+      --header-bg: #2C2A29;
     }
 
     body.dark {
-      --bg: #1e1e1e;
-      --chat-bg: #2c2c2c;
+      --bg: #1c1b1a;
+      --chat-bg: #2a2827;
       --text: #eee;
-      --user-msg: #4a6ee0;
-      --bot-msg: #3a3a3a;
-      --header-bg: linear-gradient(135deg, #b91d1d 0%, #7f1d1d 100%);
+      --user-msg: #A79F97;
+      --bot-msg: #3d3b3a;
+      --header-bg: #181716;
     }
 
     body {
@@ -102,14 +101,13 @@
     }
 
     .avatar.bot {
-      background: #FF6600;
+      background: #2C2A29;
       color: white;
     }
 
-    /* DOVV Orange */
     .avatar.user {
-      background: #ccc;
-      color: #222;
+      background: #e0e0e0;
+      color: #333;
     }
 
     .message-content {
@@ -157,7 +155,7 @@
 
     .send-btn,
     .mic-btn {
-      background: #FF6600;
+      background: var(--user-msg);
       color: white;
       border: none;
       border-radius: 50%;
@@ -172,7 +170,7 @@
 
     .send-btn:hover,
     .mic-btn:hover {
-      background: #e65c00;
+      background: #736b63;
     }
 
     .image-preview {
@@ -198,7 +196,7 @@
 <body>
   <div class="chat-container">
     <div class="chat-header">
-      🛒 DOVV Assistant
+      ✨ Keenan Salon
       <button id="toggleBtn" class="toggle-btn">🌙</button>
     </div>
     <div id="chatMessages" class="chat-messages"></div>
@@ -349,86 +347,21 @@
         }
       });
 
-      // Language selection screen
+      // Initialize chat directly
       window.onload = () => {
-        // Show language selection prompt
-        addMessage("🌍 Welcome! Please choose your preferred language:", false);
-        const buttonContainer = document.createElement("div");
-        buttonContainer.style.margin = "10px 0";
-        buttonContainer.style.textAlign = "center"; // Center the buttons
-
-        const btnEn = document.createElement("button");
-        btnEn.textContent = "🇬🇧 English";
-        // Apply consistent styling
-        Object.assign(btnEn.style, {
-          margin: "0 5px",
-          padding: "10px 15px",
-          border: "none",
-          borderRadius: "8px",
-          backgroundColor: "#FF6600", // DOVV Orange
-          color: "white",
-          cursor: "pointer",
-          fontSize: "16px"
-        });
-        btnEn.onclick = () => selectLanguage("en");
-
-        const btnFr = document.createElement("button");
-        btnFr.textContent = "🇫🇷 Français";
-        // Apply consistent styling
-        Object.assign(btnFr.style, {
-          margin: "0 5px",
-          padding: "10px 15px",
-          border: "none",
-          borderRadius: "8px",
-          backgroundColor: "#FF6600", // DOVV Orange
-          color: "white",
-          cursor: "pointer",
-          fontSize: "16px"
-        });
-        btnFr.onclick = () => selectLanguage("fr");
-
-        buttonContainer.appendChild(btnEn);
-        buttonContainer.appendChild(btnFr);
-        chatMessages.appendChild(buttonContainer);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-      };
-
-      function selectLanguage(lang) {
-        // Remove language buttons
-        const buttons = document.querySelector("div[style*='margin: 10px 0'], div[style*='text-align: center']");
-        if (buttons) buttons.remove();
-
-        // Store the user's language preference
-        userLanguage = lang;
-
-        // Send intro in selected language
-        let intro;
-        if (lang === "en") {
-          intro = (
-            "👋 **Welcome to DOVV Distribution!**\n\n" +
-            "I am your virtual assistant. How can I help you today? \n\n" +
-            "Here’s what I can do:\n" +
-            "1. 📍 Find the nearest DOVV store\n" +
-            "2. 🥖 Check for fresh bread & pastries\n" +
-            "3. 🍷 Recommend wines and spirits\n" +
-            "4. 💲 Check ongoing promotions\n\n" +
-            "Ask me anything about our supermarkets!"
-          );
-        } else {
-          intro = (
-            "👋 **Bienvenue chez DOVV Distribution !**\n\n" +
-            "Je suis votre assistant virtuel. Comment puis-je vous aider ?\n\n" +
-            "Voici ce que je peux faire :\n" +
-            "1. 📍 Trouver le magasin DOVV le plus proche\n" +
-            "2. 🥖 Vérifier la disponibilité du pain frais et viennoiseries\n" +
-            "3. 🍷 Recommander des vins et spiritueux\n" +
-            "4. 💲 Consulter les promotions en cours\n\n" +
-            "Posez-moi n'importe quelle question sur nos supermarchés !"
-          );
-        }
+        const intro = (
+          "✨ **Welcome to Keenan Salon!**\n\n" +
+          "I am your virtual concierge. How can I help you today?\n\n" +
+          "Here’s what I can do:\n" +
+          "1. 💇‍♀️ Help you find the right service\n" +
+          "2. 🗓️ Guide you to book an appointment\n" +
+          "3. 💰 Explain our gratuity-free hourly pricing\n" +
+          "4. 📍 Provide location and hours\n\n" +
+          "Ask me anything!"
+        );
         addMessage(intro, false);
         introShown = true;
-      }
+      };
 
       // Attach event listeners (avoid inline handlers so CSP nonces permit execution)
       try {
