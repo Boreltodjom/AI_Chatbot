@@ -249,34 +249,32 @@
         chatMessages.scrollTop = chatMessages.scrollHeight;
       }
 
+      let chatHistory = [];
+
       async function sendMessage() {
-        const message = messageInput.value; // Get original message (including potential leading/trailing spaces)
-        const strippedMessage = message.trim(); // For logic checks
-        const hasImage = false; // Image uploads removed
+        const message = messageInput.value;
+        const strippedMessage = message.trim();
 
-        if (!strippedMessage) return; // Prevent sending completely empty content
+        if (!strippedMessage) return;
 
-        // Add user message bubble only if there's text to show
-        if (strippedMessage) {
-          addMessage(message, true); // Show original message including spaces if user typed them
-        }
-
-        const formData = new FormData();
-        // Send message only if it exists (even if just spaces)
-        if (message !== undefined && message !== null) {
-          formData.append("message", message);
-        }
+        addMessage(message, true);
+        
+        // Push user message to local history
+        chatHistory.push({ role: "user", content: strippedMessage });
 
         messageInput.value = "";
 
         try {
           const res = await fetch("/chat", {
             method: "POST",
-            headers: { "X-CSRF-Token": csrfToken },
-            body: formData
+            headers: { 
+              "X-CSRF-Token": csrfToken,
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ message: strippedMessage, history: chatHistory })
           });
+          
           if (!res.ok) {
-            // try to get more info from the body
             let bodyText = '';
             try { bodyText = await res.text(); } catch (e) { bodyText = '<no body>'; }
             console.error('Server returned non-OK status', res.status, res.statusText, bodyText);
@@ -284,6 +282,8 @@
           } else {
             const data = await res.json();
             addMessage(data.response, false);
+            // Push assistant response to local history
+            chatHistory.push({ role: "assistant", content: data.response });
           }
         } catch (err) {
           console.error("Fetch error:", err); // Log the actual error for debugging
